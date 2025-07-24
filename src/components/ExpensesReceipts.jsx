@@ -166,7 +166,7 @@ function ExpensesReceipts() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-400">{stat.title}</p>
-                      <p className="text-2xl font-bold text-white">${stat.amount.toFixed(2)}</p>
+                      <p className="text-2xl font-bold text-white">₱{stat.amount.toFixed(2)}</p>
                     </div>
                     <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}>
                       <Icon className="h-6 w-6 text-white" />
@@ -283,7 +283,7 @@ function ExpensesReceipts() {
                           </span>
                         </td>
                         <td className="py-3 px-4 text-gray-300">{expense.date}</td>
-                        <td className="py-3 px-4 text-green-400 font-semibold">${expense.amount.toFixed(2)}</td>
+                        <td className="py-3 px-4 text-green-400 font-semibold">₱{expense.amount.toFixed(2)}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-1 rounded-full text-xs border ${getStatusColor(expense.status)}`}>
                             {expense.status}

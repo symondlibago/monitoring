@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.j
 const statsCards = [
   {
     title: 'Total Expenses',
-    value: '$12,450',
+    value: '₱12,450',
     change: '+12%',
     icon: Receipt,
     color: 'from-red-500 to-red-600',
@@ -41,7 +41,7 @@ const statsCards = [
   },
   {
     title: 'Monthly Payroll',
-    value: '$45,200',
+    value: '₱45,200',
     change: '+8%',
     icon: DollarSign,
     color: 'from-yellow-500 to-yellow-600',
@@ -54,7 +54,7 @@ const recentActivities = [
   {
     type: 'expense',
     message: 'New expense added: Office Supplies',
-    amount: '$245',
+    amount: '₱245',
     time: '2 hours ago',
     icon: Receipt,
     color: 'text-red-400'
@@ -76,7 +76,7 @@ const recentActivities = [
   {
     type: 'payroll',
     message: 'Payroll processed for 12 workers',
-    amount: '$8,400',
+    amount: '₱8,400',
     time: '1 day ago',
     icon: DollarSign,
     color: 'text-yellow-400'

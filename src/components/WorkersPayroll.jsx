@@ -252,7 +252,7 @@ function WorkersPayroll() {
                 </div>
                 <div className="text-sm">
                   <span className="text-gray-400">Hourly Rate:</span>
-                  <p className="text-white">${record.hourlyRate}/hr</p>
+                  <p className="text-white">₱{record.hourlyRate}/hr</p>
                 </div>
               </div>
               <div className="space-y-2">
@@ -266,7 +266,7 @@ function WorkersPayroll() {
                 </div>
                 <div className="text-sm">
                   <span className="text-gray-400">Overtime Rate:</span>
-                  <p className="text-white">${record.overtimeRate}/hr</p>
+                  <p className="text-white">₱{record.overtimeRate}/hr</p>
                 </div>
               </div>
             </div>
@@ -275,15 +275,15 @@ function WorkersPayroll() {
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Gross Pay</p>
-                  <p className="text-lg font-semibold text-green-400">${record.grossPay.toFixed(2)}</p>
+                  <p className="text-lg font-semibold text-green-400">₱{record.grossPay.toFixed(2)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Deductions</p>
-                  <p className="text-lg font-semibold text-red-400">-${totalDeductions.toFixed(2)}</p>
+                  <p className="text-lg font-semibold text-red-400">-₱{totalDeductions.toFixed(2)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Net Pay</p>
-                  <p className="text-lg font-semibold text-blue-400">${record.netPay.toFixed(2)}</p>
+                  <p className="text-lg font-semibold text-blue-400">₱{record.netPay.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -293,15 +293,15 @@ function WorkersPayroll() {
               <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="bg-gray-800/30 rounded p-2 text-center">
                   <p className="text-gray-400">Tax</p>
-                  <p className="text-red-400">${record.deductions.tax.toFixed(2)}</p>
+                  <p className="text-red-400">₱{record.deductions.tax.toFixed(2)}</p>
                 </div>
                 <div className="bg-gray-800/30 rounded p-2 text-center">
                   <p className="text-gray-400">Insurance</p>
-                  <p className="text-red-400">${record.deductions.insurance.toFixed(2)}</p>
+                  <p className="text-red-400">₱{record.deductions.insurance.toFixed(2)}</p>
                 </div>
                 <div className="bg-gray-800/30 rounded p-2 text-center">
                   <p className="text-gray-400">Retirement</p>
-                  <p className="text-red-400">${record.deductions.retirement.toFixed(2)}</p>
+                  <p className="text-red-400">₱{record.deductions.retirement.toFixed(2)}</p>
                 </div>
               </div>
             </div>
@@ -380,7 +380,7 @@ function WorkersPayroll() {
                     <div>
                       <p className="text-sm text-gray-400">{stat.title}</p>
                       <p className="text-2xl font-bold text-white">
-                        {stat.isHours ? `${stat.amount}h` : `$${stat.amount.toFixed(2)}`}
+                        {stat.isHours ? `${stat.amount}h` : `₱${stat.amount.toFixed(2)}`}
                       </p>
                     </div>
                     <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}>
