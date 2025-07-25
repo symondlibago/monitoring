@@ -11,7 +11,8 @@ import {
   Home,
   ChevronLeft,
   ChevronRight,
-  Users
+  Users,
+  LogOut
 } from 'lucide-react'
 import { Button } from '@/components/ui/button.jsx'
 import './App.css'
@@ -23,6 +24,7 @@ import EquipmentInventory from './components/EquipmentInventory'
 import TaskMonitoring from './components/TaskMonitoring'
 import WorkersPayroll from './components/WorkersPayroll'
 import Employee from './components/Employee'
+import LoginPage from './components/LoginPage'
 
 const navigationItems = [
   { path: '/', icon: Home, label: 'Dashboard', color: 'text-blue-400' },
@@ -33,7 +35,7 @@ const navigationItems = [
   { path: '/employees', icon: Users, label: 'Employee Management', color: 'text-cyan-400' },
 ]
 
-function Sidebar({ isCollapsed, toggleSidebar }) {
+function Sidebar({ isCollapsed, toggleSidebar, onLogout }) {
   const location = useLocation()
 
   return (
@@ -133,6 +135,39 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
         })}
       </nav>
 
+      {/* Logout Button */}
+      <div className="p-2 border-t border-gray-700">
+        <motion.button
+          whileHover={{ scale: 1.02, x: 2 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onLogout}
+          className="flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 group w-full hover:bg-red-600/20 text-red-400"
+        >
+          <LogOut className="h-5 w-5 flex-shrink-0" />
+          
+          <AnimatePresence mode="wait">
+            {!isCollapsed && (
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+                className="font-medium whitespace-nowrap"
+              >
+                Logout
+              </motion.span>
+            )}
+          </AnimatePresence>
+
+          {/* Tooltip for collapsed state */}
+          {isCollapsed && (
+            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+              Logout
+            </div>
+          )}
+        </motion.button>
+      </div>
+
       {/* Footer status indicator */}
       <div className="p-4 border-t border-gray-700">
         <motion.div
@@ -166,7 +201,7 @@ function Sidebar({ isCollapsed, toggleSidebar }) {
   )
 }
 
-function MainContent({ sidebarCollapsed }) {
+function MainContent({ sidebarCollapsed, onLogout }) {
   const location = useLocation()
 
   return (
@@ -201,17 +236,38 @@ function MainContent({ sidebarCollapsed }) {
 }
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
+  const handleLogin = () => {
+    setIsLoggedIn(true)
+  }
+
+  const handleLogout = () => {
+    setIsLoggedIn(false)
+    setSidebarCollapsed(false)
+  }
 
   const toggleSidebar = () => {
     setSidebarCollapsed(!sidebarCollapsed)
   }
 
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={handleLogin} />
+  }
+
   return (
     <Router>
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
-        <Sidebar isCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar} />
-        <MainContent sidebarCollapsed={sidebarCollapsed} />
+        <Sidebar 
+          isCollapsed={sidebarCollapsed} 
+          toggleSidebar={toggleSidebar} 
+          onLogout={handleLogout}
+        />
+        <MainContent 
+          sidebarCollapsed={sidebarCollapsed} 
+          onLogout={handleLogout}
+        />
       </div>
     </Router>
   )
