@@ -1,160 +1,178 @@
-import { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { 
   Search, 
   Plus, 
-  Wrench, 
   Package, 
-  User, 
-  Calendar,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Filter,
-  Grid,
-  List,
+  CheckCircle, 
+  AlertCircle, 
+  Clock, 
+  Settings,
+  Eye,
   Edit,
   Trash2,
-  Eye
+  Download,
+  Filter,
+  User,
+  Calendar,
+  Wrench,
+  Zap,
+  Gauge,
+  Grid3X3,
+  List,
+  MapPin
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Button } from '@/components/ui/button.jsx'
+import { Input } from '@/components/ui/input.jsx'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 
-// Sample data for equipment inventory
-const initialEquipment = [
-  {
-    id: 1,
-    name: 'Screwdriver Set',
-    category: 'Hand Tools',
-    totalQuantity: 5,
-    availableQuantity: 4,
-    borrowedQuantity: 1,
-    image: '/api/placeholder/150/150',
-    status: 'Available',
-    borrowedBy: 'John Doe',
-    borrowDate: '2024-07-23',
-    expectedReturn: '2024-07-25',
-    condition: 'Good',
-    location: 'Tool Room A'
-  },
-  {
-    id: 2,
-    name: 'Electric Drill',
-    category: 'Power Tools',
-    totalQuantity: 3,
-    availableQuantity: 2,
-    borrowedQuantity: 1,
-    image: '/api/placeholder/150/150',
-    status: 'Partially Available',
-    borrowedBy: 'Jane Smith',
-    borrowDate: '2024-07-22',
-    expectedReturn: '2024-07-24',
-    condition: 'Excellent',
-    location: 'Tool Room B'
-  },
-  {
-    id: 3,
-    name: 'Safety Helmet',
-    category: 'Safety Equipment',
-    totalQuantity: 10,
-    availableQuantity: 7,
-    borrowedQuantity: 3,
-    image: '/api/placeholder/150/150',
-    status: 'Available',
-    borrowedBy: 'Multiple Users',
-    borrowDate: '2024-07-20',
-    expectedReturn: '2024-07-30',
-    condition: 'Good',
-    location: 'Safety Storage'
-  },
-  {
-    id: 4,
-    name: 'Measuring Tape',
-    category: 'Measuring Tools',
-    totalQuantity: 8,
-    availableQuantity: 8,
-    borrowedQuantity: 0,
-    image: '/api/placeholder/150/150',
-    status: 'Available',
-    borrowedBy: null,
-    borrowDate: null,
-    expectedReturn: null,
-    condition: 'Good',
-    location: 'Tool Room A'
-  },
-  {
-    id: 5,
-    name: 'Circular Saw',
-    category: 'Power Tools',
-    totalQuantity: 2,
-    availableQuantity: 0,
-    borrowedQuantity: 2,
-    image: '/api/placeholder/150/150',
-    status: 'All Borrowed',
-    borrowedBy: 'Mike Johnson',
-    borrowDate: '2024-07-21',
-    expectedReturn: '2024-07-26',
-    condition: 'Fair',
-    location: 'Tool Room B'
-  },
-  {
-    id: 6,
-    name: 'Hammer Set',
-    category: 'Hand Tools',
-    totalQuantity: 6,
-    availableQuantity: 4,
-    borrowedQuantity: 2,
-    image: '/api/placeholder/150/150',
-    status: 'Available',
-    borrowedBy: 'Sarah Wilson',
-    borrowDate: '2024-07-23',
-    expectedReturn: '2024-07-25',
-    condition: 'Good',
-    location: 'Tool Room A'
-  }
-]
-
-const categories = ['All', 'Hand Tools', 'Power Tools', 'Safety Equipment', 'Measuring Tools']
-const statusOptions = ['All', 'Available', 'Partially Available', 'All Borrowed', 'Maintenance']
-const conditionOptions = ['All', 'Excellent', 'Good', 'Fair', 'Poor']
-
-function EquipmentInventory() {
-  const [equipment, setEquipment] = useState(initialEquipment)
+const EquipmentInventory = () => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('All')
-  const [selectedStatus, setSelectedStatus] = useState('All')
-  const [selectedCondition, setSelectedCondition] = useState('All')
-  const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
-  const [showAddForm, setShowAddForm] = useState(false)
+  const [categoryFilter, setCategoryFilter] = useState('All')
+  const [statusFilter, setStatusFilter] = useState('All')
+  const [conditionFilter, setConditionFilter] = useState('All')
+  const [viewMode, setViewMode] = useState('card') // 'card' or 'table'
 
-  // Filter equipment based on search term, category, status, and condition
-  const filteredEquipment = useMemo(() => {
-    return equipment.filter(item => {
-      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           (item.borrowedBy && item.borrowedBy.toLowerCase().includes(searchTerm.toLowerCase()))
-      const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory
-      const matchesStatus = selectedStatus === 'All' || item.status === selectedStatus
-      const matchesCondition = selectedCondition === 'All' || item.condition === selectedCondition
-      
-      return matchesSearch && matchesCategory && matchesStatus && matchesCondition
-    })
-  }, [equipment, searchTerm, selectedCategory, selectedStatus, selectedCondition])
-
-  // Calculate totals
-  const totalItems = equipment.reduce((sum, item) => sum + item.totalQuantity, 0)
-  const availableItems = equipment.reduce((sum, item) => sum + item.availableQuantity, 0)
-  const borrowedItems = equipment.reduce((sum, item) => sum + item.borrowedQuantity, 0)
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Available': return 'bg-green-500/20 text-green-400 border-green-500/30'
-      case 'Partially Available': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-      case 'All Borrowed': return 'bg-red-500/20 text-red-400 border-red-500/30'
-      case 'Maintenance': return 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30'
+  // Enhanced sample equipment data with new fields
+  const equipment = [
+    {
+      id: 'EQ001',
+      image: '🔧',
+      name: 'Screwdriver Set',
+      makeType: 'Stanley FatMax Pro',
+      capacity: '6-piece set, 25 Nm torque',
+      quantity: 5,
+      condition: 'Good',
+      presentLocation: 'Tool Storage Room A'
+    },
+    {
+      id: 'EQ002',
+      image: '🔨',
+      name: 'Electric Drill',
+      makeType: 'DeWalt DCD771C2',
+      capacity: '20V Max, 1/2" Chuck, 300 UWO',
+      quantity: 3,
+      condition: 'Excellent',
+      presentLocation: 'Workshop Section B'
+    },
+    {
+      id: 'EQ003',
+      image: '⛑️',
+      name: 'Safety Helmet',
+      makeType: 'MSA V-Gard',
+      capacity: 'Class E, 20,000V protection',
+      quantity: 10,
+      condition: 'Good',
+      presentLocation: 'Safety Equipment Locker'
+    },
+    {
+      id: 'EQ004',
+      image: '📏',
+      name: 'Measuring Tape',
+      makeType: 'Stanley PowerLock',
+      capacity: '25ft length, 1" blade width',
+      quantity: 8,
+      condition: 'Good',
+      presentLocation: 'Tool Storage Room A'
+    },
+    {
+      id: 'EQ005',
+      image: '⚙️',
+      name: 'Circular Saw',
+      makeType: 'Makita 5007MG',
+      capacity: '7-1/4" blade, 15 Amp motor',
+      quantity: 2,
+      condition: 'Fair',
+      presentLocation: 'Workshop Section C'
+    },
+    {
+      id: 'EQ006',
+      image: '🔨',
+      name: 'Hammer Set',
+      makeType: 'Estwing E3-16C',
+      capacity: '16oz claw, Steel handle',
+      quantity: 6,
+      condition: 'Good',
+      presentLocation: 'Tool Storage Room B'
+    },
+    {
+      id: 'EQ007',
+      image: '⚡',
+      name: 'Angle Grinder',
+      makeType: 'Bosch GWS13-50VSP',
+      capacity: '5" disc, 13 Amp, 11,500 RPM',
+      quantity: 4,
+      condition: 'Excellent',
+      presentLocation: 'Workshop Section A'
+    },
+    {
+      id: 'EQ008',
+      image: '📐',
+      name: 'Level Set',
+      makeType: 'Klein Tools 935RBLT',
+      capacity: '48" aluminum, 3 vials',
+      quantity: 5,
+      condition: 'Good',
+      presentLocation: 'Tool Storage Room A'
+    },
+    {
+      id: 'EQ009',
+      image: '🔩',
+      name: 'Impact Wrench',
+      makeType: 'Milwaukee 2767-20',
+      capacity: '1/2" drive, 1000 ft-lbs torque',
+      quantity: 3,
+      condition: 'Excellent',
+      presentLocation: 'Workshop Section B'
+    },
+    {
+      id: 'EQ010',
+      image: '🥽',
+      name: 'Safety Goggles',
+      makeType: '3M SecureFit SF400',
+      capacity: 'Anti-fog, UV protection',
+      quantity: 15,
+      condition: 'Good',
+      presentLocation: 'Safety Equipment Locker'
+    },
+    {
+      id: 'EQ011',
+      image: '🔥',
+      name: 'Welding Machine',
+      makeType: 'Lincoln Electric Power MIG 210',
+      capacity: '208V, 210A output, MIG/Flux',
+      quantity: 2,
+      condition: 'Excellent',
+      presentLocation: 'Welding Station'
+    },
+    {
+      id: 'EQ012',
+      image: '🪜',
+      name: 'Extension Ladder',
+      makeType: 'Werner D6228-2',
+      capacity: '28ft extension, 250 lbs capacity',
+      quantity: 4,
+      condition: 'Good',
+      presentLocation: 'Equipment Yard'
     }
-  }
+  ]
+
+  // Filter equipment based on search and filters
+  const filteredEquipment = equipment.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.makeType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.presentLocation.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.id.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    const matchesCondition = conditionFilter === 'All' || item.condition === conditionFilter
+    
+    return matchesSearch && matchesCondition
+  })
+
+  // Calculate statistics
+  const totalItems = equipment.reduce((sum, item) => sum + item.quantity, 0)
+  const excellentItems = equipment.filter(item => item.condition === 'Excellent').reduce((sum, item) => sum + item.quantity, 0)
+  const goodItems = equipment.filter(item => item.condition === 'Good').reduce((sum, item) => sum + item.quantity, 0)
 
   const getConditionColor = (condition) => {
     switch (condition) {
@@ -166,76 +184,186 @@ function EquipmentInventory() {
     }
   }
 
-  const EquipmentCard = ({ item, index }) => (
+  const getConditionBadge = (condition) => {
+    switch (condition) {
+      case 'Excellent': return 'bg-green-600/20 text-green-400 border-green-500/30'
+      case 'Good': return 'bg-blue-600/20 text-blue-400 border-blue-500/30'
+      case 'Fair': return 'bg-yellow-600/20 text-yellow-400 border-yellow-500/30'
+      case 'Poor': return 'bg-red-600/20 text-red-400 border-red-500/30'
+      default: return 'bg-gray-600/20 text-gray-400 border-gray-500/30'
+    }
+  }
+
+  const CardView = () => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      whileHover={{ scale: 1.02 }}
-      className="group"
+      transition={{ delay: 0.3 }}
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
     >
-      <Card className="bg-gray-900/50 border-gray-700 hover:border-gray-600 transition-all duration-300 h-full">
-        <CardContent className="p-4">
-          <div className="relative mb-4">
-            <div className="w-full h-32 bg-gray-800 rounded-lg flex items-center justify-center overflow-hidden">
-              <Wrench className="h-12 w-12 text-gray-600" />
-            </div>
-            <div className="absolute top-2 right-2">
-              <span className={`px-2 py-1 rounded-full text-xs border ${getStatusColor(item.status)}`}>
-                {item.status}
-              </span>
-            </div>
-          </div>
-          
-          <h3 className="text-lg font-semibold text-white mb-2">{item.name}</h3>
-          <p className="text-sm text-gray-400 mb-3">{item.category}</p>
-          
-          <div className="space-y-2 mb-4">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Total:</span>
-              <span className="text-white">{item.totalQuantity}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Available:</span>
-              <span className="text-green-400">{item.availableQuantity}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Borrowed:</span>
-              <span className="text-red-400">{item.borrowedQuantity}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-400">Condition:</span>
-              <span className={getConditionColor(item.condition)}>{item.condition}</span>
-            </div>
-          </div>
-
-          {item.borrowedBy && (
-            <div className="bg-gray-800/50 rounded-lg p-3 mb-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <User className="h-4 w-4 text-blue-400" />
-                <span className="text-sm text-white">{item.borrowedBy}</span>
+      {filteredEquipment.map((item, index) => (
+        <motion.div
+          key={item.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.05 + 0.4 }}
+          whileHover={{ scale: 1.02, y: -5 }}
+          className="group"
+        >
+          <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700 hover:border-green-500/50 transition-all duration-300">
+            <CardContent className="p-6">
+              {/* Equipment Header */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="text-3xl">{item.image}</div>
+                  <div>
+                    <h3 className="font-semibold text-white">{item.name}</h3>
+                    <p className="text-sm text-gray-400">{item.id}</p>
+                  </div>
+                </div>
+                <div className={`px-2 py-1 rounded-full text-xs border ${getConditionBadge(item.condition)}`}>
+                  {item.condition}
+                </div>
               </div>
-              <div className="flex items-center space-x-2 text-xs text-gray-400">
-                <Calendar className="h-3 w-3" />
-                <span>Due: {item.expectedReturn}</span>
-              </div>
-            </div>
-          )}
 
-          <div className="flex space-x-2">
-            <Button size="sm" variant="ghost" className="text-blue-400 hover:bg-blue-500/20 flex-1">
-              <Eye className="h-4 w-4 mr-1" />
-              View
-            </Button>
-            <Button size="sm" variant="ghost" className="text-yellow-400 hover:bg-yellow-500/20">
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="ghost" className="text-red-400 hover:bg-red-500/20">
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+              {/* Equipment Details */}
+              <div className="space-y-3 mb-4">
+                {/* Make/Type */}
+                <div className="flex items-start space-x-2 text-sm">
+                  <Wrench className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-gray-300 font-medium">Make/Type:</p>
+                    <p className="text-gray-400 text-xs">{item.makeType}</p>
+                  </div>
+                </div>
+
+                {/* Capacity */}
+                <div className="flex items-start space-x-2 text-sm">
+                  <Gauge className="h-4 w-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-gray-300 font-medium">Capacity:</p>
+                    <p className="text-gray-400 text-xs">{item.capacity}</p>
+                  </div>
+                </div>
+
+                {/* Quantity */}
+                <div className="flex items-center space-x-2 text-sm">
+                  <Package className="h-4 w-4 text-green-400" />
+                  <span className="text-gray-300">Quantity:</span>
+                  <span className="font-medium text-white">{item.quantity}</span>
+                </div>
+
+                {/* Present Location */}
+                <div className="flex items-start space-x-2 text-sm">
+                  <MapPin className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-gray-300 font-medium">Location:</p>
+                    <p className="text-gray-400 text-xs">{item.presentLocation}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-2 pt-4 border-t border-gray-700">
+                <Button size="sm" variant="outline" className="flex-1 border-blue-600/30 text-blue-400 hover:bg-blue-600/20">
+                  <Eye className="h-3 w-3 mr-1" />
+                  View
+                </Button>
+                <Button size="sm" variant="outline" className="flex-1 border-green-600/30 text-green-400 hover:bg-green-600/20">
+                  <Edit className="h-3 w-3 mr-1" />
+                  Edit
+                </Button>
+                <Button size="sm" variant="outline" className="border-red-600/30 text-red-400 hover:bg-red-600/20">
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
+    </motion.div>
+  )
+
+  const TableView = () => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+      className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-lg border border-gray-700 overflow-hidden"
+    >
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gradient-to-r from-gray-800 to-gray-900 border-b border-gray-700">
+            <tr>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Image</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Name</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Make/Type</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Capacity</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Quantity</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Condition</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Present Location</th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-300">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-700">
+            {filteredEquipment.map((item, index) => (
+              <motion.tr
+                key={item.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 + 0.4 }}
+                className="hover:bg-gray-800/30 transition-colors duration-200"
+              >
+                <td className="px-6 py-4">
+                  <div className="text-2xl">{item.image}</div>
+                </td>
+                <td className="px-6 py-4">
+                  <div>
+                    <div className="font-medium text-white">{item.name}</div>
+                    <div className="text-sm text-gray-400">{item.id}</div>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="text-sm text-gray-300">{item.makeType}</div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="text-sm text-gray-300">{item.capacity}</div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center space-x-2">
+                    <Package className="h-4 w-4 text-green-400" />
+                    <span className="font-medium text-white">{item.quantity}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className={`inline-flex px-2 py-1 rounded-full text-xs border ${getConditionBadge(item.condition)}`}>
+                    {item.condition}
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="h-4 w-4 text-red-400" />
+                    <span className="text-sm text-gray-300">{item.presentLocation}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex space-x-2">
+                    <Button size="sm" variant="outline" className="border-blue-600/30 text-blue-400 hover:bg-blue-600/20">
+                      <Eye className="h-3 w-3" />
+                    </Button>
+                    <Button size="sm" variant="outline" className="border-green-600/30 text-green-400 hover:bg-green-600/20">
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button size="sm" variant="outline" className="border-red-600/30 text-red-400 hover:bg-red-600/20">
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </td>
+              </motion.tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </motion.div>
   )
 
@@ -245,226 +373,148 @@ function EquipmentInventory() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="flex flex-col md:flex-row md:items-center md:justify-between"
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
             Equipment Inventory
           </h1>
-          <p className="text-gray-400 mt-2">Track tools and equipment borrowing</p>
+          <p className="text-gray-400 mt-1">Track tools and equipment inventory</p>
         </div>
-        <div className="flex space-x-2 mt-4 md:mt-0">
-          <div className="flex bg-gray-800 rounded-lg p-1">
+        <div className="flex items-center space-x-2">
+          {/* View Mode Toggle */}
+          <div className="flex items-center bg-gray-800/50 rounded-lg p-1 border border-gray-700">
             <Button
               size="sm"
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              onClick={() => setViewMode('grid')}
-              className="text-white"
+              variant={viewMode === 'card' ? 'default' : 'ghost'}
+              onClick={() => setViewMode('card')}
+              className={`${viewMode === 'card' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
             >
-              <Grid className="h-4 w-4" />
+              <Grid3X3 className="h-4 w-4" />
             </Button>
             <Button
               size="sm"
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              onClick={() => setViewMode('list')}
-              className="text-white"
+              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              onClick={() => setViewMode('table')}
+              className={`${viewMode === 'table' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
             >
               <List className="h-4 w-4" />
             </Button>
           </div>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              onClick={() => setShowAddForm(true)}
-              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Equipment
-            </Button>
-          </motion.div>
+          <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Equipment
+          </Button>
         </div>
       </motion.div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { title: 'Total Items', count: totalItems, color: 'from-blue-500 to-blue-600', icon: Package },
-          { title: 'Available', count: availableItems, color: 'from-green-500 to-green-600', icon: CheckCircle },
-          { title: 'Borrowed', count: borrowedItems, color: 'from-red-500 to-red-600', icon: Clock }
-        ].map((stat, index) => {
-          const Icon = stat.icon
-          return (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <Card className="bg-gray-900/50 border-gray-700 hover:border-gray-600 transition-colors">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-400">{stat.title}</p>
-                      <p className="text-2xl font-bold text-white">{stat.count}</p>
-                    </div>
-                    <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}>
-                      <Icon className="h-6 w-6 text-white" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )
-        })}
-      </div>
-
-      {/* Filters and Search */}
+      {/* Statistics Cards */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ delay: 0.1 }}
+        className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
-        <Card className="bg-gray-900/50 border-gray-700">
+        <Card className="bg-gradient-to-br from-blue-600/10 to-blue-800/10 border-blue-500/20">
           <CardContent className="p-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              {/* Search Bar */}
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search equipment, categories, or borrowers..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-green-500 focus:outline-none transition-colors"
-                />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-400">Total Items</p>
+                <p className="text-3xl font-bold text-white">{totalItems}</p>
+                <p className="text-sm text-blue-400 mt-1">Equipment units</p>
               </div>
+              <div className="p-3 bg-blue-600/20 rounded-lg">
+                <Package className="h-8 w-8 text-blue-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-              {/* Filters */}
-              <div className="flex flex-wrap gap-2">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:outline-none appearance-none cursor-pointer"
-                >
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
+        <Card className="bg-gradient-to-br from-green-600/10 to-green-800/10 border-green-500/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-400">Excellent Condition</p>
+                <p className="text-3xl font-bold text-white">{excellentItems}</p>
+                <p className="text-sm text-green-400 mt-1">Top quality</p>
+              </div>
+              <div className="p-3 bg-green-600/20 rounded-lg">
+                <CheckCircle className="h-8 w-8 text-green-400" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-                <select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:outline-none appearance-none cursor-pointer"
-                >
-                  {statusOptions.map(status => (
-                    <option key={status} value={status}>{status}</option>
-                  ))}
-                </select>
-
-                <select
-                  value={selectedCondition}
-                  onChange={(e) => setSelectedCondition(e.target.value)}
-                  className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-green-500 focus:outline-none appearance-none cursor-pointer"
-                >
-                  {conditionOptions.map(condition => (
-                    <option key={condition} value={condition}>{condition}</option>
-                  ))}
-                </select>
+        <Card className="bg-gradient-to-br from-yellow-600/10 to-yellow-800/10 border-yellow-500/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-400">Good Condition</p>
+                <p className="text-3xl font-bold text-white">{goodItems}</p>
+                <p className="text-sm text-yellow-400 mt-1">Serviceable</p>
+              </div>
+              <div className="p-3 bg-yellow-600/20 rounded-lg">
+                <Settings className="h-8 w-8 text-yellow-400" />
               </div>
             </div>
           </CardContent>
         </Card>
       </motion.div>
 
-      {/* Equipment Grid/List */}
+      {/* Search and Filters */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
+        transition={{ delay: 0.2 }}
+        className="bg-gradient-to-r from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700"
       >
-        {viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <AnimatePresence>
-              {filteredEquipment.map((item, index) => (
-                <EquipmentCard key={item.id} item={item} index={index} />
-              ))}
-            </AnimatePresence>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search equipment, make/type, or location..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-gray-800/50 border-gray-600 text-white placeholder-gray-400"
+              />
+            </div>
           </div>
-        ) : (
-          <Card className="bg-gray-900/50 border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-xl text-white">
-                Equipment List ({filteredEquipment.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-700">
-                      <th className="text-left py-3 px-4 text-gray-300 font-medium">Equipment</th>
-                      <th className="text-left py-3 px-4 text-gray-300 font-medium">Category</th>
-                      <th className="text-left py-3 px-4 text-gray-300 font-medium">Total</th>
-                      <th className="text-left py-3 px-4 text-gray-300 font-medium">Available</th>
-                      <th className="text-left py-3 px-4 text-gray-300 font-medium">Borrowed</th>
-                      <th className="text-left py-3 px-4 text-gray-300 font-medium">Status</th>
-                      <th className="text-left py-3 px-4 text-gray-300 font-medium">Condition</th>
-                      <th className="text-left py-3 px-4 text-gray-300 font-medium">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <AnimatePresence>
-                      {filteredEquipment.map((item, index) => (
-                        <motion.tr
-                          key={item.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ duration: 0.3, delay: index * 0.05 }}
-                          className="border-b border-gray-800 hover:bg-gray-800/30 transition-colors"
-                        >
-                          <td className="py-3 px-4 text-white font-medium">{item.name}</td>
-                          <td className="py-3 px-4 text-gray-300">{item.category}</td>
-                          <td className="py-3 px-4 text-blue-400">{item.totalQuantity}</td>
-                          <td className="py-3 px-4 text-green-400">{item.availableQuantity}</td>
-                          <td className="py-3 px-4 text-red-400">{item.borrowedQuantity}</td>
-                          <td className="py-3 px-4">
-                            <span className={`px-2 py-1 rounded-full text-xs border ${getStatusColor(item.status)}`}>
-                              {item.status}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className={`${getConditionColor(item.condition)}`}>
-                              {item.condition}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className="flex space-x-2">
-                              <Button size="sm" variant="ghost" className="text-blue-400 hover:bg-blue-500/20">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button size="sm" variant="ghost" className="text-yellow-400 hover:bg-yellow-500/20">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button size="sm" variant="ghost" className="text-red-400 hover:bg-red-500/20">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </AnimatePresence>
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+          
+          <select
+            value={conditionFilter}
+            onChange={(e) => setConditionFilter(e.target.value)}
+            className="px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-md text-white"
+          >
+            <option value="All">All Conditions</option>
+            <option value="Excellent">Excellent</option>
+            <option value="Good">Good</option>
+            <option value="Fair">Fair</option>
+            <option value="Poor">Poor</option>
+          </select>
+        </div>
       </motion.div>
+
+      {/* Equipment Display */}
+      {viewMode === 'card' ? <CardView /> : <TableView />}
+
+      {/* No Results */}
+      {filteredEquipment.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center py-12"
+        >
+          <Package className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-400 mb-2">No equipment found</h3>
+          <p className="text-gray-500">Try adjusting your search criteria or filters</p>
+        </motion.div>
+      )}
     </div>
   )
 }
 
 export default EquipmentInventory
+
+
 
